@@ -13,5 +13,5 @@ it is like easyTCP (first version) but more stable, understandable, flexable, re
 | groups      |    no    |    yes   |
 | events      |    no    |    yes   |
 | stable      | not much |    yes   |
-
-upload soon...
+| logging     |    no    |    yes   |
+| encryption  |    yes   |    soon  |
