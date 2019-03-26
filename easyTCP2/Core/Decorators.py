@@ -341,7 +341,7 @@ class ServerDecorators(DecoratorUtils):
                 """
                 if hasattr(self, 'error_fetcher'):
                     return getattr(self, 'error_fetcher')
-                logger.warning('%s tried to call the error_fetcher but not added any' %self)
+                logger.warning('%s tried to call the error_fetcher but not found any' %self)
                 return lambda: None
 
             @classmethod
@@ -369,8 +369,10 @@ class ServerDecorators(DecoratorUtils):
                             print("%d tried to access %s with no permissions" %(client.id, foo))
                 """
                 if asyncio.iscoroutinefunction(func):
+                    logger.debug("Added error_fetcher to \"%s\"" %func.__name__)
                     return setattr(cls, 'error_fetcher', func)
-                logger.error("added error_fetcher (%s) is not coroutine raised ValueError" %func.__name__)
+                    
+                logger.error("Added error_fetcher (%s) is not coroutine raised ValueError" %func.__name__)
                 raise ValueError("%s is not coroutine function for the error_fetcher" %func.__name__)
 
 

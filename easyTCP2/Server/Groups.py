@@ -1,5 +1,7 @@
-import asyncio
+import asyncio, logging
 from ..Exceptions import GroupExceptions
+
+logger = logging.getLogger("Group")
 
 
 class Group(object):
@@ -13,10 +15,34 @@ class Group(object):
         max_users(default:100) - how much users allowed in the group
             if you want unlimited users enter None
     """
+
+    @staticmethod
+    @property
+    def groups():
+        return {
+            'superusers': Group('superusers', None), # both used by server by default
+            'clients': Group('clients', None)
+        }
+
     def __init__(self, name, max_users=100):
         self.name      = name
         self.max_users = max_users # for unlimited enter None
         self.users     = []
+        
+        Group.groups[self.name] = self
+        logger.info("%s created" %self.name)
+
+    @classmethod
+    async def get_or_create(cls, name):
+        if self.groups.has_key(name):
+            return self.group[name]
+        return cls(name=name)
+
+    async def delete(self):
+        del Group.groups[self.name]
+        for user in self.users:
+            del user.groups[user.groups.index(self)]
+        del self
 
     async def add(self, client) -> None:
         """
@@ -56,6 +82,7 @@ class Group(object):
         [:example:]
             await group1.send("Hello", message="Hello group 1")
         """
+        logger.debug("sending multi cast to group %s (method: %s)" %(self.name, method))
         if not(len(self.users)):
             return # if the len = 0 its False but the "not" makes it True so 
                    # there is no need to send messages to none

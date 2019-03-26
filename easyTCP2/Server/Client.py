@@ -18,7 +18,7 @@ class Client(Protocol, ServerClientDecorators):
 
     [:STATICMETHODS:]
         Client.error_codes:
-            a dict with numbers as a key and exceptions as a value
+            a dict with numbers as keys and exceptions as value
             if you want to raise error you can call
                 raise Client.error_codes[2]("Handshake Error")
             and this will call the
