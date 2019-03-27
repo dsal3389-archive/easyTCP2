@@ -1,7 +1,7 @@
 [Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
 # easyTCP2
 
-#install
+# install
 `pip install easyTCP2`
 
 ## what is easyTCP2?
