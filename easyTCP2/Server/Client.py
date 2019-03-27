@@ -1,6 +1,8 @@
 import asyncio, logging
-from ..Core import Protocol
-from ..Exceptions import ClientExceptions
+
+from .Groups import Group
+from ..Core  import Protocol
+from ..Exceptions      import ServerClientExceptions, GroupExceptions
 from ..Core.Decorators import ServerClientDecorators
 
 logger = logging.getLogger("Server Client")
@@ -25,18 +27,20 @@ class Client(Protocol, ServerClientDecorators):
             @Client.error decorator if exists else it raise it uselessliy
     """
     error_codes = {
-        2: ClientExceptions.HandshakeError,
-        6: ClientExceptions.Recved404Error,
+        2: ServerClientExceptions.HandshakeError,
+        6: ServerClientExceptions.Recved404Error,
     } # invis code error is -1 is when recving undefine error code
+    _last_client_id = 0
 
     def __init__(self, reader, writer, server):
         super().__init__(reader, writer, loop=server.loop)
         self.addr         = self.writer.get_extra_info('peername')
-        self.id           = 1
+        self.id           = self.__class__._last_client_id +1
         self.is_superuser = False
         self.groups = []
         # user related groups
 
+        self.__class__._last_client_id = self.id # updating
         self.server = server
 
     async def register(self) -> None:
@@ -85,8 +89,51 @@ class Client(Protocol, ServerClientDecorators):
         await self.close()
         await asyncio.wait([group.remove(self) for group in self.groups])
 
-        logger.info("Client %d left the server" %self)
+        logger.info("Client %d left the server" %self.id)
         self.loop.create_task(self.call('left', server=self.server))
+
+    async def clean_groups(self) -> None:
+        """
+        [:Client func:]
+            removing the client from all the groups
+            but keeping the 'client' or the 'superusers' 
+            because it not safe to be removed from the build in groups
+        """
+        for group in self.groups:
+
+            # protected groups to remove from
+            if group.name != 'clients' and group.name != 'superusers':
+                await group.remove(self)
+    
+    async def switch_group(self, from_, to):
+        """
+        [:Client func:]
+            switch client group from 1 to 2
+
+        [:params:]
+            from_ - the group that the exists in and be removed from
+            to - add to group
+
+        [:example:]
+            client.groups: # client groups
+                ['clients', 'foo']
+
+            await client.switch_group('foo', 'oof')
+            # switching
+
+            client.groups:
+                ['clients', 'oof']
+                # group changed
+
+        """
+        if not(from_ in self.groups): 
+            raise GroupExceptions.GroupDoesNotExist("cannot switch client to %s when is not exists in %s" %(to, from_))
+
+        if to not in Group.keys():
+            raise GroupExceptions.GroupDoesNotExist("not found such group %s" %to)
+
+        await Group[from_].remove(self)
+        await Group[to].add(self)
     
     async def handshake(self):
         """
@@ -159,6 +206,9 @@ class Client(Protocol, ServerClientDecorators):
             in this case we registered it and now it will pass the data
             to the function
         """
+        if len(method)==0: return
+
+        logger.debug("client %d recved (method: %s, data: %s)" %(self.id, method, data))
         if hasattr(self.server.Request, method):
             logger.info("Client with id of %d requested %s" %(self.id, method))
             return await (getattr(self.server.Request, method))(server=self.server, client=self, **data)
@@ -182,7 +232,7 @@ class Client(Protocol, ServerClientDecorators):
 
         code = await self.call('error', error=error)
         if code == -1:
-            logger.error('Client %d raised %s no "error" decorator added so just rasing it' %(self, error))
+            logger.error('Client %d raised %s no "error" decorator added so just rasing it' %(self.id, error))
             raise error
 
     async def _register(self) -> None:

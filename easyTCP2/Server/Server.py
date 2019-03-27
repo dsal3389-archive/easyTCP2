@@ -39,13 +39,8 @@ class Server(ServerDecorators):
     threads  = []
     supported_versions = ['0.0.1'] # used by the handshak function in Client object
     # enter the supported client versions here
-    
-    Client = None
 
-    groups = {
-        'superusers': Group('superusers', None), # both used by server by default
-        'clients': Group('clients', None)
-    }
+    _running_server_object = None
 
     def __init__(self, ip=None, port=None, *, loop=None):
         self.ip     = ip   or Settings.server['ip']
@@ -54,6 +49,18 @@ class Server(ServerDecorators):
 
         self.loop    = loop or asyncio.get_event_loop()
         self.version = '0.0.1' # change this
+
+    @classmethod
+    def get_current(cls) -> object or None:
+        """
+        [:server static func:]
+            returnning the running server object
+
+        [:NOTE:]
+            this is useful when you have @Server.Event() and you want
+            access to the current server object
+        """
+        return cls._running_server_object
 
     async def run(self):
         """
@@ -65,7 +72,19 @@ class Server(ServerDecorators):
             self.handle_connection,
             self.ip, self.port
         )
+        await self._setup()
+
+    async def _setup(self):
+        """
+        [:server safe func:]
+            all the things the server need to do when connected
+        """
         logger.info("server started running (ip: %s| port: %d)" %(self.ip, self.port))
+        
+        Group('clients', None),
+        Group('superusers', None)
+        
+        self.__class__._running_server_object = self
         asyncio.ensure_future(self._event_listener(), loop=self.loop)
         self.loop.create_task(self.call('ready'))
 
@@ -92,9 +111,9 @@ class Server(ServerDecorators):
             client - client to add to the build in groups
         """
         if client.is_superuser:
-            await self.groups['superusers'].add(client)
+            await Group.groups['superusers'].add(client)
         else:
-            await self.groups['clients'].add(client)
+            await Group.groups['clients'].add(client)
 
     async def remove_client(self, client) -> None:
         """

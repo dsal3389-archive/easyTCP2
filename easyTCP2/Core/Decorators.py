@@ -123,7 +123,7 @@ class ServerDecorators(DecoratorUtils):
             self._create_future()
             # just getting the running event and creating future
 
-            logger.info('Event created')
+            logger.info('Event %s created' )
 
         def _create_and_run(self, *args, **kwargs):
             """
@@ -237,15 +237,19 @@ class ServerDecorators(DecoratorUtils):
                 print("my %s method raised %s" %(foo, error))
             # the foo parameter is the Func object of the current function
         """
-        def __init__(self, parent:object, *, superuser:bool=False, allowed_groups:list=['*']):
+        def __init__(self, parent:object, *, name=None, superuser:bool=False, allowed_groups:list=['*']):
             self.server    = parent
+            self.name      = name
             self.for_super = superuser
             self.allowed_groups = allowed_groups
             # this request be allowed to users in the given group name
         
         def __call__(self, func):
             self.func = self.Func(
-                func=func, superusers=self.for_super, allowed_groups=self.allowed_groups
+                name=self.name,
+                func=func, 
+                superusers=self.for_super, 
+                allowed_groups=self.allowed_groups
             )
             if self.func.valid():
                 setattr(self.__class__, str(self.func), self.func)
@@ -276,20 +280,40 @@ class ServerDecorators(DecoratorUtils):
                 class from here to check validation everytime and more
 
             [:params:]
+                name - request custome name (if none given the decorated function will be the name)
                 func - the added func as request
                 superusers - parsed from the Request object
                 allowed_groups - parsed from the Request object
             """
-            def __init__(self, func, superusers:bool, allowed_groups:list):
+            def __init__(self, name, func, superusers:bool, allowed_groups:list):
                 self.func      = func
                 self.for_super = superusers
                 self.allowed_groups = allowed_groups
+                self.name   = self.get_name(name)
 
                 self.server = None
                 self.client = None
 
                 self.args   = ()
                 self.kwargs = {}
+
+            @property
+            def __doc__(self):
+                return self.func.__doc__
+
+            def get_name(self, name):
+                """
+                [:validator/func:]
+                    getting the given name if None (as default) the request
+                    name will be the decorated function name
+
+                [:param:]
+                    name - passed name to the Request decorator
+                """
+                if name == None:
+                    return self.func.__name__ 
+                ls = name.split(' ')
+                return '_'.join(ls) # removing the spaces
 
             def valid(self):
                 return asyncio.iscoroutinefunction(self.func)
@@ -303,12 +327,13 @@ class ServerDecorators(DecoratorUtils):
                     client - client to check if he has access
                 """
                 if client.is_superuser: return True
-                # superusers have access to everything in the server
-
-                if self.for_super: return client.is_superuser       
+                # superusers have access to everything in the server      
                 
                 if "*" not in self.allowed_groups:
                     return any(str(group) in self.allowed_groups for group in client.groups)
+                    
+                if self.for_super: return client.is_superuser 
+
                 return True
 
             def __call__(self, server:object, client:object, **kwargs):
@@ -331,7 +356,7 @@ class ServerDecorators(DecoratorUtils):
                 ).__await__()
 
             def __str__(self):
-                return self.func.__name__
+                return self.name
             
             def _call_error(self):
                 """
@@ -379,7 +404,7 @@ class ServerDecorators(DecoratorUtils):
 class ServerClientDecorators(DecoratorUtils):
 
     @classmethod
-    class ready(BASE_DECORATOR):
+    class join(BASE_DECORATOR):
         """
         [:decorator:]
             called when a new connection made and register successfuly
@@ -397,6 +422,7 @@ class ServerClientDecorators(DecoratorUtils):
         
         [:params:]
             client - the client who left/killed
+            server - server object
         """
 
     @classmethod
@@ -422,4 +448,45 @@ class ClientDecorators(DecoratorUtils):
         [:params:]
             client - your client object
         """
+
+    @classmethod
+    class leave(BASE_DECORATOR):
+        """
+        [:decorator:]
+            called when client leaving/connection closed
+
+        [:params:]
+            client - your client object
+        """
+
+    @classmethod
+    class error(BASE_DECORATOR):
+        """
+        [:decorator:]
+            when client rasing error you can catch it
+            with this decorator
+
+        [:params:]
+            client - your client object
+            error - the error
+        """
     
+    @classmethod
+    class on_recv(BASE_DECORATOR):
+        """
+        [:decorator:]
+            when client recving data it passed to
+            the default process function and move from there
+            if you use this decorator you will overwrite the default
+            process function and your function will be the new "processor"
+
+        [:params:]
+            client - your client object
+            method - recved method as a string
+            data - data as a dict
+
+        [:example:]
+            @Client.on_recv()
+            async def recving(client, method, data):
+                print("method:%s\ndata:\n\t %s" %(method, data))
+        """
