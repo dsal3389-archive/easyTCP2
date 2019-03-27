@@ -8,8 +8,8 @@ logging.basicConfig(filename='server.log', level=20, format=Utils.logger_format)
 extend_modules = ['Events', 'Requests']
 Settings.use_default()
 
-#for file in extend_modules:
-#    Utils.load_external_module(file)
+for file in extend_modules:
+    Utils.load_external_module(file)
 
 
 @Server.ready()

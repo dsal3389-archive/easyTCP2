@@ -79,7 +79,7 @@ class Group(object, metaclass=static_magic):
         
         [:params:]
             name - group name
-        """groups
+        """
         if self.groups.has_key(name):
             return self.group[name]
         return cls(name=name)
