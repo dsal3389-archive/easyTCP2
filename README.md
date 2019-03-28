@@ -8,7 +8,6 @@
 `pip install easyTCP2`
 
 ## what is easyTCP2?
-
 it is the same concept like easyTCP (first version) but more stable, understandable, flexable, readable and more futures
 (and also because i was too layz to update the last one)
 this gives you full controll on your server and make it easy and stable
@@ -27,6 +26,14 @@ this gives you full controll on your server and make it easy and stable
 # when to use 
 if you creating a small project that needs a server
 or an app that module can be very useful
+
+### examples
+example files [here][examples].
+I add there examples in any update
+if there is a missing version in the example it is because
+it is not a big change or even only bug fixing
+
+[examples]: https://github.com/dsal3389/easyTCP2/tree/master/examples/version.0.0.2
 
 # quick start 🤯
 ```py
@@ -59,3 +66,6 @@ if __name__=="__main__":
     finally:
         loop.close()
 ```
+
+if you like or wanna try install it! 🏅
+it is not hard
