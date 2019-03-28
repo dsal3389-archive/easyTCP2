@@ -1,15 +1,19 @@
 [Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/easyTCP2.svg?logo=python&logoColor=yellow)
+![GitHub](https://img.shields.io/github/license/dsal3389/easyTCP2.svg?style=popout)
+
 # easyTCP2
 
-# install
+# install 🤩
 `pip install easyTCP2`
 
 ## what is easyTCP2?
 
-it is like easyTCP (first version) but more stable, understandable, flexable, readable and more futures
+it is the same concept like easyTCP (first version) but more stable, understandable, flexable, readable and more futures
 (and also because i was too layz to update the last one)
+this gives you full controll on your server and make it easy and stable
 
-## what I get from that package?
+## what I get from that package? 🤔
 |             | easyTCP  | easyTCP2 |
 |:-----------:|----------|----------|
 | user levels |    yes   |    yes   |
@@ -18,3 +22,40 @@ it is like easyTCP (first version) but more stable, understandable, flexable, re
 | stable      | not much |    yes   |
 | logging     |    no    |    yes   |
 | encryption  |    yes   |    soon  |
+| logging     |    no    |    yes   |
+
+# when to use 
+if you creating a small project that needs a server
+or an app that module can be very useful
+
+# quick start 🤯
+```py
+import asyncio
+from easyTCP2.Core.Settings import Settings
+from easyTCP2.Server import Server
+
+Settings.use_default() # using default
+
+
+@Server.ready()
+async def foo(server):
+    print("Server running (ip: %s | port: %d)" %(server.ip, server.port))
+
+@Server.Event(5)
+async def oof():
+    print("oof event called :)")
+
+
+async def main(loop):
+    server = Server(loop=loop)
+    await server
+
+if __name__=="__main__":
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete()
+
+    try:
+        loop.run_forever()
+    finally:
+        loop.close()
+```
