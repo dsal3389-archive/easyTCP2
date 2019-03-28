@@ -8,7 +8,7 @@
 `pip install easyTCP2`
 
 ## what is easyTCP2?
-it is the same concept like easyTCP (first version) but more stable, understandable, flexable, readable and more futures
+it is the same concept like easyTCP (first version) but more stable, understandable, flexable, readable and more features
 (and also because i was too layz to update the last one)
 this gives you full controll on your server and make it easy and stable
 
@@ -33,7 +33,7 @@ I add there examples in any update
 if there is a missing version in the example it is because
 it is not a big change or even only bug fixing
 
-[examples]: https://github.com/dsal3389/easyTCP2/tree/master/examples/version.0.0.2
+[examples]: https://github.com/dsal3389/easyTCP2/tree/master/examples
 
 # quick start 🤯
 ```py
