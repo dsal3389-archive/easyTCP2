@@ -81,7 +81,8 @@ class Settings(object):
 
         Settings.protocol={
             'read_size': 4096,
-            'encoding': 'utf-8'
+            'encoding': 'utf-8',
+            'timeout': 30 # in seconds
         }
 
         Settings.server={

@@ -3,7 +3,11 @@ from easyTCP2.Core.Settings import Settings
 from easyTCP2.Server import Server, Client, Group
 from easyTCP2 import Utils
 
-logging.basicConfig(filename='server.log', level=20, format=Utils.logger_format)
+logging.basicConfig(
+    filename='Server.log', 
+    level=20, 
+    format=Utils.logger_format
+)
 
 extend_modules = ['Events', 'Requests']
 Settings.use_default()
@@ -16,7 +20,7 @@ for file in extend_modules:
 async def ready(server):
     print('[ready] server is ready on ip: %s and port: %d' %(server.ip, server.port))
 
-    # creating groups
+    # creating groups ("rooms")
     Group('room1', 20)
     Group('room2', 20)
     Group('room3', 20)

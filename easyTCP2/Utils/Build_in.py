@@ -2,12 +2,12 @@ from ..Server import Server
 
 
 @Server.Request()
-async def help(server, client, f):
+async def help(server, client, f='help'):
     """
     [:BUILD IN:]
         when import this file you recv some requests
         that I have build to make it easy for you or just an example
-    
+
     [:NOTE:]
         I recommand to change BUILD_IN function __doc__
         because if you use that build in help method
@@ -16,7 +16,12 @@ async def help(server, client, f):
     [:example:]
         from easyTCP2.Utils.Build_in import *
     """
-    if f in server.requests.keys():
-        return (await client.send("help", server.requests[f].__doc__))
-    return (await client.send(2, reason='unknown method %s' %f))
+    if hasattr(server.Request, f):
+        await client.send(
+            'HELP',
+            help=str((getattr(server.Request, f)).__doc__)
+        )
 
+#@Server.Request(superusers=True)
+#async def show(server, client, g='clients'):
+    #if 

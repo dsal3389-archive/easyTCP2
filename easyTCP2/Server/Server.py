@@ -81,7 +81,7 @@ class Server(ServerDecorators):
         """
         logger.info("server started running (ip: %s| port: %d)" %(self.ip, self.port))
         
-        Group('clients', None),
+        Group('clients', None) # default groups
         Group('superusers', None)
         
         self.__class__._running_server_object = self
@@ -111,9 +111,9 @@ class Server(ServerDecorators):
             client - client to add to the build in groups
         """
         if client.is_superuser:
-            await Group.groups['superusers'].add(client)
+            await Group['superusers'].add(client)
         else:
-            await Group.groups['clients'].add(client)
+            await Group['clients'].add(client)
 
     async def remove_client(self, client) -> None:
         """

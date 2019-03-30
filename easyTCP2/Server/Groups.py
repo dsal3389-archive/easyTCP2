@@ -17,11 +17,18 @@ class static_magic(type):
         Group.keys()
         # returns the group names
     """
-    def __len__(self):
-        return len(self.groups)
 
     def keys(self):
         return self.groups.keys()
+
+    def values(self):
+        return self.groups.values()
+
+    def items(self):
+        return self.groups.items()
+
+    def has_key(self, key):
+        return key in self.keys()
 
     def __getitem__(self, item):
         return self.groups.get(item, None)
@@ -39,7 +46,7 @@ class Group(object, metaclass=static_magic):
         to manage permissions and make
         things look clear use Group
 
-    [:params:]
+    [:params:]f
         superusers - if only superusers allowed in in the Group
         name - group name
         max_users(default:100) - how much users allowed in the group
@@ -48,7 +55,7 @@ class Group(object, metaclass=static_magic):
 
     groups = {}
 
-    def __init__(self, name, max_users:int=100, superusers:bool=False):
+    def __init__(self, name:str, max_users:int=100, superusers:bool=False):
         self.name      = name
         self.for_super = superusers # if the group available from superusers only
         self.max_users = max_users # for unlimited enter None
@@ -80,8 +87,8 @@ class Group(object, metaclass=static_magic):
         [:params:]
             name - group name
         """
-        if self.groups.has_key(name):
-            return self.group[name]
+        if cls.has_key(name):
+            return cls[name]
         return cls(name=name)
 
     def delete(self) -> None:
@@ -98,6 +105,8 @@ class Group(object, metaclass=static_magic):
         del Group.groups[self.name]
         for user in self.users:
             del user.groups[user.groups.index(self)]
+
+        logger.warning("%s deleted" %self.name)
         del self
 
     async def add(self, client:object) -> None:
@@ -168,17 +177,22 @@ class Group(object, metaclass=static_magic):
 
         [:NOTE:]
             the given pramas should exists in the users object
+            that allows you to search for clients with custom veriables
             
         [:example:]
-            usr = await groupA.search(id=3, is_superuser=True)
+            usr = await Group['foo'].search(id=3, is_superuser=True) # genrator
+
+            async for client in Group['foo'].search(is_superuser=True):
+                print("client %d is a superuser and he is in foo group" %client.id)
         """
         for user in self.users:
             search_params = len(kwargs)
             found_true = 0
 
             for k, v in kwargs.items():
-                if getattr(user, k) == v:
-                    found_true += 1
+                if hasattr(user, k): # for custom variables
+                    if getattr(user, k) == v:
+                        found_true += 1
             if search_params == found_true:
                 yield user
     

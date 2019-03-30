@@ -8,9 +8,19 @@
 `pip install easyTCP2`
 
 ## what is easyTCP2?
-it is the same concept like easyTCP (first version) but more stable, understandable, flexable, readable and more features
+it is the same concept like easyTCP (f irst version) but more stable, understandable, flexable, readable and more features
 (and also because i was too layz to update the last one)
 this gives you full controll on your server and make it easy and stable
+
+### inspiration 
+I have inspired by [discord.py][discordpy] package because this
+help you build bots so easily and they are useful so I wanted an easy way to build
+asyncronus server so I have did many tests and took inspiration from the [discord.py][discordpy] code
+(no I dont copy code accept this [function][coppiedfunc]) I dont take cradit for things I didnt think/did
+all by myself 
+
+[coppiedfunc]: https://github.com/dsal3389/easyTCP2/blob/master/easyTCP2/Core/Protocol.py#L82
+[discordpy]: https://github.com/Rapptz/discord.py
 
 ## what I get from that package? 🤔
 |             | easyTCP  | easyTCP2 |
@@ -67,5 +77,5 @@ if __name__=="__main__":
         loop.close()
 ```
 
-if you like or wanna try install it! 🏅
+if you like or wanna try, install it! 🏅
 it is not hard

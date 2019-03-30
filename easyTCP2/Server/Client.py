@@ -1,7 +1,7 @@
 import asyncio, logging
 
 from .Groups import Group
-from ..Core  import Protocol
+from ..Core  import Protocol, Settings
 from ..Exceptions      import ServerClientExceptions, GroupExceptions
 from ..Core.Decorators import ServerClientDecorators
 
@@ -53,7 +53,7 @@ class Client(Protocol, ServerClientDecorators):
         try:
             await asyncio.wait_for(
                 self.handshake(),
-                20, # timeout
+                Settings.Settings.protocol['timeout'], # timeout
                 loop=self.loop
             )
         except Exception: # any exception here is code 2
@@ -104,6 +104,8 @@ class Client(Protocol, ServerClientDecorators):
             # protected groups to remove from
             if group.name != 'clients' and group.name != 'superusers':
                 await group.remove(self)
+        # could use here asyncio.wait([...]) but keeping it readable :)
+        # this may change
     
     async def switch_group(self, from_, to):
         """

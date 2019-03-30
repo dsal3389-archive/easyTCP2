@@ -349,11 +349,18 @@ class ServerDecorators(DecoratorUtils):
                 return (self._call_error())(server=self.server, client=self.client, error=ClientExceptions.ClientDoesNotHasAccess)
             
             def __await__(self):
-                return self.func(
-                    server=self.server, 
-                    client=self.client,
-                    *self.args, **self.kwargs
-                ).__await__()
+                try:
+                    return self.func(
+                        server=self.server, 
+                        client=self.client,
+                        *self.args, **self.kwargs
+                    ).__await__()
+                except Exception as e:
+                    return self._call_error()(
+                        server=self.server, 
+                        client=self.client,
+                        error=e
+                    ).__await__()
 
             def __str__(self):
                 return self.name
@@ -367,7 +374,9 @@ class ServerDecorators(DecoratorUtils):
                 if hasattr(self, 'error_fetcher'):
                     return getattr(self, 'error_fetcher')
                 logger.warning('%s tried to call the error_fetcher but not found any' %self)
-                return lambda: None
+                return self._anon
+            
+            async def _anon(self): pass
 
             @classmethod
             def error(cls, func):
@@ -382,6 +391,7 @@ class ServerDecorators(DecoratorUtils):
                     error - this is the error that your method raised
                     client - client who requested the and probobly raised it
                     server - server object that this function is running on
+                    self(you can change his name) - your function object
                 
                 [:example:]
                     @Server.Request(superusers=True)
@@ -389,7 +399,7 @@ class ServerDecorators(DecoratorUtils):
                         print("something")
 
                     @Server.Request.foo.error
-                    async def oof(foo, client, error):
+                    async def oof(foo, client, server, error):
                         if isinstance(ClientExceptions.ClientDoesNotHasAccess, error):
                             print("%d tried to access %s with no permissions" %(client.id, foo))
                 """
