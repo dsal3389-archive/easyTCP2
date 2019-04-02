@@ -12,6 +12,7 @@ it is the same concept like easyTCP (first version) but more stable, understanda
 (and also because i was too layz to update the last one)
 this gives you full controll on your server and make it easy and stable
 
+
 ### inspiration 
 I have inspired by [discord.py][discordpy] package because this
 help you build bots so easily and they are useful so I wanted an easy way to build
@@ -21,6 +22,7 @@ all by myself
 
 [coppiedfunc]: https://github.com/dsal3389/easyTCP2/blob/master/easyTCP2/Core/Protocol.py#L82
 [discordpy]: https://github.com/Rapptz/discord.py
+
 
 ## what I get from that package? 🤔
 |             | easyTCP  | easyTCP2 |
@@ -37,9 +39,11 @@ all by myself
 it is the best to give you the control about those things
 (there is encryption support)
 
+
 # when to use 
 if you creating a small project that needs a server
 or an app that module can be very useful
+
 
 ### examples
 example files [here][examples].
@@ -48,6 +52,7 @@ if there is a missing version in the example it is because
 it is not a big change or even only bug fixing
 
 [examples]: https://github.com/dsal3389/easyTCP2/tree/master/examples
+
 
 # quick start 🤯
 ```py
