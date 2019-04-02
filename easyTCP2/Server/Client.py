@@ -34,7 +34,7 @@ class Client(Protocol, ServerClientDecorators):
 
     def __init__(self, reader, writer, server):
         super().__init__(reader, writer, loop=server.loop)
-        #self.addr         = self.writer.get_extra_info('peername') # via client addr you can add him to a blacklist
+        self.addr         = self.writer.get_extra_info('peername') # via client addr you can add him to a blacklist
         self.id           = self.__class__._last_client_id +1
         self.is_superuser = False
         self.groups = []
