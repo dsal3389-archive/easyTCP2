@@ -30,8 +30,12 @@ all by myself
 | events      |    no    |    yes   |
 | stable      | not much |    yes   |
 | logging     |    no    |    yes   |
-| encryption  |    yes   |    soon  |
+| encryption  |    yes   |    no    |
 | logging     |    no    |    yes   |
+
+### why there is no encryption like last version?
+it is the best to give you the control about those things
+(there is encryption support)
 
 # when to use 
 if you creating a small project that needs a server
