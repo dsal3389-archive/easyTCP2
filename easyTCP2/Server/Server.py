@@ -47,6 +47,11 @@ class Server(ServerDecorators):
         self.port   = port or Settings.server['port']
         self.client = Server._get_client(Settings.server['client']['obj'])
 
+        self.encryting = False
+        # global encryption variable if False server dosent encrypt
+        # all data but if True encrypt data via given encryption object
+        # (do not turn True if no enc object given)
+
         self.loop    = loop or asyncio.get_event_loop()
         self.version = '0.0.1' # change this
 
@@ -62,33 +67,50 @@ class Server(ServerDecorators):
         """
         return cls._running_server_object
 
-    async def run(self):
+    async def run(self) -> None:
         """
         [:server func:]
             when called the server starts to run on the given port & IP
             you can do this also by awating the server obj
         """
+        self._load_encryption()
         self.connection = await asyncio.start_server(
             self.handle_connection,
             self.ip, self.port
         )
         await self._setup()
 
-    async def _setup(self):
+    def _load_encryption(self) -> None:
+        enc_obj  = Settings.encryption['object']
+        if enc_obj is None:
+            logger.debug("No encryption object was given")
+            return 
+
+        # those function must be in your enc object
+        required = ['dencrypt', 'encrypt']
+        for i in required:
+            if not(hasattr(enc_obj, i)):
+                reason = ("object %s dont have %s that required" %(enc_obj, i))
+                logger.error(reason)
+
+                raise ValueError(reason)
+        self.encrypting=True
+
+    async def _setup(self) -> None:
         """
         [:server safe func:]
             all the things the server need to do when connected
         """
         logger.info("server started running (ip: %s| port: %d)" %(self.ip, self.port))
         
-        Group('clients', None) # default groups
-        Group('superusers', None)
+        Group('clients', None, loop=self.loop) # default groups
+        Group('superusers', None, loop=self.loop)
         
         self.__class__._running_server_object = self
         asyncio.ensure_future(self._event_listener(), loop=self.loop)
         self.loop.create_task(self.call('ready'))
 
-    async def handle_connection(self, reader, writer):
+    async def handle_connection(self, reader:object, writer:object) -> None:
         """
         [:server func:]
             when recving a new connection we append it to a client obj

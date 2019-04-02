@@ -4,7 +4,7 @@ from ..Core.Settings import Settings
 logger = logging.getLogger('\teasyTCP | protocol')
 
 
-def json_dumper(data:dict):
+def json_dumper(data:dict) -> bytes:
     """
     [:Protocol util:]
         converts a dict to json string and then to bytes
@@ -16,7 +16,7 @@ def json_dumper(data:dict):
     data = json.dumps(data)
     return bytes(data, encoding=Settings.protocol['encoding'])
 
-def json_loader(data:bytes):
+def json_loader(data:bytes) -> str:
     """
     [:Protocol util:]
         converts the recved data from bytes to string and then
@@ -42,41 +42,55 @@ class Protocol(object):
     def __init__(self, reader=None, writer=None, *, loop=None):
         self.reader = reader
         self.writer = writer
+        self.encryption = Settings.encryption['object']
+        # accept getting the object everytime we get it only once
 
         self.loop  = loop or asyncio.get_event_loop()
 
         self.to_python = json_loader
         self.to_bytes = json_dumper
 
-    async def send(self, method:str, *, drain:bool=False, **kwargs) -> None:
+    async def send(self, method:str, *, drain:bool=False, enc:bool=None, **kwargs) -> None:
         """
         [:core:]
             send data to the client via given encoding in settings
 
         [:params:]
+            drain  - await reader.drain()
             method - the method name
             **kwargs - data
+            enc - if to encrypt the sended data
+                (can be used only if you gave encryption object)
 
         [:example:]
             await client1.send('handshake', data="some data", id=client1.id, foo=True)
         """
         data = self.to_bytes({'method':method, **kwargs})
-        self.writer.write(data)
+        if self.server.encrypting and enc:
+            data = self.encryption.encrypt(data)
+            # encrypting the data 
 
+        self.writer.write(data)
         if drain:
             await self.writer.drain()
 
-    async def recv(self) -> tuple:
+    async def recv(self, enc:bool=False) -> tuple:
         """
         [:core:]
             recv data from the client and returning a tuple that contain method and data
+
+        [:params:]
+            enc - if to dencrypt the recved data
 
         [:example:]
             method, data = await client1.recv()
         """
         data = await self.reader.read(Settings.protocol['read_size'])
-        data = self.to_python(data)
+        if enc:
+            data = self.encryption.dencrypt(data)
+            # dencrypting the data
 
+        data = self.to_python(data)
         return data['method'], {k:i for k, i in data.items() if k != 'method'}
 
     async def expected(self, *args) -> tuple:

@@ -500,3 +500,56 @@ class ClientDecorators(DecoratorUtils):
             async def recving(client, method, data):
                 print("method:%s\ndata:\n\t %s" %(method, data))
         """
+
+
+class GroupDecorators(DecoratorUtils):
+
+    @classmethod
+    class created(BASE_DECORATOR):
+        """
+        [:decorator:]
+            called when new Group created
+
+        [:params:]
+            group - created group
+            server - server object
+        """
+
+    @classmethod
+    class destroyed(BASE_DECORATOR):
+        """
+        [:decorator:]
+            called when a Group gets deleted
+        
+        [:params:]
+            group - destroyed group object
+
+        [:NOTE:]
+            the passed group object is still usable
+            but not registered in the server/clients this
+            if you add to the passed group object clients this may confus you
+        """
+    
+    @classmethod
+    class join(BASE_DECORATOR):
+        """
+        [:decorator:]
+            called when client added to Group
+
+        [:params:]
+            group - group object
+            client - added client object
+        """
+
+    @classmethod
+    class left(BASE_DECORATOR):
+        """
+        [:decorator:]
+            called when client leave the group
+
+        [:params:]
+            group - group object
+            client - the client object who left
+        """
+
+

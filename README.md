@@ -8,7 +8,7 @@
 `pip install easyTCP2`
 
 ## what is easyTCP2?
-it is the same concept like easyTCP (f irst version) but more stable, understandable, flexable, readable and more features
+it is the same concept like easyTCP (first version) but more stable, understandable, flexable, readable and more features
 (and also because i was too layz to update the last one)
 this gives you full controll on your server and make it easy and stable
 

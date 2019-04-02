@@ -34,7 +34,7 @@ class Client(Protocol, ServerClientDecorators):
 
     def __init__(self, reader, writer, server):
         super().__init__(reader, writer, loop=server.loop)
-        self.addr         = self.writer.get_extra_info('peername')
+        #self.addr         = self.writer.get_extra_info('peername') # via client addr you can add him to a blacklist
         self.id           = self.__class__._last_client_id +1
         self.is_superuser = False
         self.groups = []
@@ -107,7 +107,7 @@ class Client(Protocol, ServerClientDecorators):
         # could use here asyncio.wait([...]) but keeping it readable :)
         # this may change
     
-    async def switch_group(self, from_, to):
+    async def switch_group(self, from_:str, to:str) -> None:
         """
         [:Client func:]
             switch client group from 1 to 2
@@ -128,16 +128,16 @@ class Client(Protocol, ServerClientDecorators):
                 # group changed
 
         """
-        if not(from_ in self.groups): 
+        if not(any(str(group) == from_  for group in self.groups)): 
             raise GroupExceptions.GroupDoesNotExist("cannot switch client to %s when is not exists in %s" %(to, from_))
 
-        if to not in Group.keys():
+        if not(Group.has_key(to)):
             raise GroupExceptions.GroupDoesNotExist("not found such group %s" %to)
 
         await Group[from_].remove(self)
         await Group[to].add(self)
     
-    async def handshake(self):
+    async def handshake(self) -> None:
         """
         [:Client method:]
             when a new connection made we need to identify
@@ -170,7 +170,7 @@ class Client(Protocol, ServerClientDecorators):
             raise ValueError
         await self.send('HANDSHAKE')
     
-    async def listen(self):
+    async def listen(self) -> None:
         """
         [:Client func:]
             when client registerd successfuly
@@ -186,7 +186,7 @@ class Client(Protocol, ServerClientDecorators):
                 # doing this on a thread so it wont block the next recved data 
         await self.kill()
     
-    async def process(self, method:str, data:dict):
+    async def process(self, method:str, data:dict) -> None:
         """
         [:Client func:]
             processing the recved message from the connection
@@ -216,7 +216,7 @@ class Client(Protocol, ServerClientDecorators):
             return await (getattr(self.server.Request, method))(server=self.server, client=self, **data)
         await self.raise_error_code(6) # 404 error
         
-    async def raise_error_code(self, code) -> Exception:
+    async def raise_error_code(self, code) -> Exception or None:
         """
         [:Client func:]
             function recv code and based on the error_codes dict

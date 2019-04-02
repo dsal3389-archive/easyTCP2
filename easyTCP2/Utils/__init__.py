@@ -1,6 +1,6 @@
 
 
-logger_format = "[%(asctime)s] %(levelname)s\teasyTCP2 | %(name)s -> %(message)s"
+logger_format = "[%(asctime)s] %(levelname)s\teasyTCP2::%(name)s -> %(message)s"
 
 def load_external_module(module_name) -> None:
     """

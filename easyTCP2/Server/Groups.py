@@ -1,5 +1,6 @@
 import asyncio, logging
 from ..Exceptions import GroupExceptions
+from ..Core.Decorators import GroupDecorators
 
 logger = logging.getLogger("Group")
 
@@ -27,7 +28,7 @@ class static_magic(type):
     def items(self):
         return self.groups.items()
 
-    def has_key(self, key):
+    def has_key(self, key): # why did they removed it );
         return key in self.keys()
 
     def __getitem__(self, item):
@@ -40,13 +41,13 @@ class static_magic(type):
         # this function is equal to GroupA.delete()
 
 
-class Group(object, metaclass=static_magic):
+class Group(GroupDecorators, metaclass=static_magic):
     """
     [:Group:]
         to manage permissions and make
         things look clear use Group
 
-    [:params:]f
+    [:params:]
         superusers - if only superusers allowed in in the Group
         name - group name
         max_users(default:100) - how much users allowed in the group
@@ -55,13 +56,15 @@ class Group(object, metaclass=static_magic):
 
     groups = {}
 
-    def __init__(self, name:str, max_users:int=100, superusers:bool=False):
+    def __init__(self, name:str, max_users:int=100, superusers:bool=False, *,loop=None):
         self.name      = name
         self.for_super = superusers # if the group available from superusers only
         self.max_users = max_users # for unlimited enter None
         self.users     = []
-        
-        self.__class__.groups[self.name] = self
+        self.loop      = loop or asyncio.get_event_loop()
+        self.__class__.groups[self.name] = self # updating the Group object
+
+        self.loop.create_task(self.call('created'))
         logger.info("%s created" %self.name)
 
     def _check_validation(self, client:object) -> bool:
@@ -106,7 +109,8 @@ class Group(object, metaclass=static_magic):
         for user in self.users:
             del user.groups[user.groups.index(self)]
 
-        logger.warning("%s deleted" %self.name)
+        logger.warning("[Group] %s has been deleted" %self.name)
+        self.loop.create_task(self.call('destroyed'))
         del self
 
     async def add(self, client:object) -> None:
@@ -120,7 +124,7 @@ class Group(object, metaclass=static_magic):
         """
         if self.max_users is not None:
             if (len(self.users) +1) > self.max_users:
-                logger.debug("Tried to add too many clients {0}/{0}".format(self.max_users))
+                logger.warning("[Group] Tried to add too many clients {0}/{0}".format(self.max_users))
                 raise GroupExceptions.GroupMaxClients("tried to add more client to %s when there are %d users out of %d" %(self, len(self.users), self.max_users))
         
         permitted = self._check_validation(client)
@@ -129,6 +133,8 @@ class Group(object, metaclass=static_magic):
 
         self.users.append(client)
         client.groups.append(self)
+        
+        await self.call('join', client=client)
         logger.debug("Client via id %d joined %s" %(client.id, str(self)))
 
     async def remove(self, client:object) -> None:
@@ -141,6 +147,8 @@ class Group(object, metaclass=static_magic):
         """
         del client.groups[client.groups.index(self)]
         del self.users[self.users.index(client)]
+
+        await self.call('left', client=client)
         logger.debug("Client via id %d removed from group %s" %(client.id, str(self)))
 
     async def send(self, method:str, **kwargs) -> None:
