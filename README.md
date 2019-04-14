@@ -20,7 +20,7 @@ asyncronus server so I have did many tests and took inspiration from the [discor
 (no I dont copy code accept this [function][coppiedfunc]) I dont take cradit for things I didnt think/did
 all by myself 
 
-[coppiedfunc]: https://github.com/dsal3389/easyTCP2/blob/master/easyTCP2/Core/Protocol.py#L82
+[coppiedfunc]: https://github.com/dsal3389/easyTCP2/blob/master/easyTCP2/Core/Protocol.py#L96
 [discordpy]: https://github.com/Rapptz/discord.py
 
 
