@@ -1,11 +1,10 @@
 [![Documentation Status](https://readthedocs.org/projects/easytcp2/badge/?version=latest)](https://easytcp2.readthedocs.io/en/latest/?badge=latest)
-[Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/easyTCP2.svg?logo=python&logoColor=yellow)
 ![GitHub](https://img.shields.io/github/license/dsal3389/easyTCP2.svg?style=popout)
 
 # easyTCP2
 
-# install 🤩
+# install 
 `pip install easyTCP2`
 
 ## what is easyTCP2?
