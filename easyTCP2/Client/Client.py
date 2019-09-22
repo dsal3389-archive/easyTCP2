@@ -1,8 +1,9 @@
-import asyncio
+import asyncio, logging
 from ..Core import Protocol
 from ..Core.Decorators import ClientDecorators
 from ..Exceptions import ClientExceptions
 
+logger = logging.getLogger("Client")
 
 class Client(Protocol, ClientDecorators):
     """

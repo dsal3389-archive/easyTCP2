@@ -1,10 +1,17 @@
-import asyncio
+import asyncio, sys, logging
+
+sys.path.append('..')
+
 from easyTCP2 import Utils
 from easyTCP2.Client import Client
 from easyTCP2.Core.Settings import Settings
 
 Settings.use_default()
-
+logging.basicConfig(
+    filename='Client.log', 
+    level=20, 
+    format=Utils.logger_format
+)
 
 @Client.ready()
 async def foo(client):
@@ -37,6 +44,7 @@ async def main(loop):
 
     while True:
         c = await loop.run_in_executor(None, input, '>>> ')
+
         to_send = await Utils.string_to_dict(c)
         await client.send(**to_send)
 

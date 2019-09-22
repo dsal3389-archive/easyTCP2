@@ -50,7 +50,7 @@ class Protocol(object):
         self.to_python = json_loader
         self.to_bytes = json_dumper
 
-    async def send(self, method:str, *, drain:bool=False, enc:bool=None, **kwargs) -> None:
+    async def send(self, method:str, *, drain:bool=False, enc:bool=False, **kwargs) -> None:
         """
         [:core:]
             send data to the client via given encoding in settings
@@ -66,7 +66,7 @@ class Protocol(object):
             await client1.send('handshake', data="some data", id=client1.id, foo=True)
         """
         data = self.to_bytes({'method':method, **kwargs})
-        if self.server.encrypting and enc:
+        if enc:
             data = self.encryption.encrypt(data)
             # encrypting the data 
 

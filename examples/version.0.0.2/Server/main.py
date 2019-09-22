@@ -1,11 +1,14 @@
-import asyncio, logging
+import asyncio, logging, sys
+
+sys.path.append('..')
+
 from easyTCP2.Core.Settings import Settings
 from easyTCP2.Server import Server, Client, Group
 from easyTCP2 import Utils
 
 logging.basicConfig(
     filename='Server.log', 
-    level=20, 
+    level=logging.DEBUG, 
     format=Utils.logger_format
 )
 

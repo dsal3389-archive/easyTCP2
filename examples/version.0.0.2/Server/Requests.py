@@ -84,3 +84,8 @@ async def help(server, client, f='help'):
             'HELP',
             help=str((getattr(server.Request, f)).__doc__)
         )
+
+
+@Server.Request.help.error
+async def help_error(func, client, server, error):
+    print(error)
